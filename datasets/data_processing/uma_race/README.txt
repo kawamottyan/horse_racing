@@ -1,0 +1,2 @@
+import-data:jra-vanのデータが入ったpostgressqlから必要なデータをテーブルで保存するコード
+pre-cleansing-data:基本的なデータの前処理をするコード
