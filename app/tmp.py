@@ -1,43 +1,30 @@
-# import streamlit as st
-# from selenium import webdriver
-# from selenium.webdriver.chrome.options import Options
-# from selenium.webdriver.chrome.service import Service
-# from webdriver_manager.chrome import ChromeDriverManager
-# from selenium.webdriver.common.by import By
-# from bs4 import BeautifulSoup
-
-# def get_driver():
-#     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-
-# options = Options()
-# options.add_argument('--disable-gpu')
-# options.add_argument('--headless')
-
-# driver = get_driver()
-# driver.get("https://nar.netkeiba.com/top/")
-# html = driver.page_source
-# driver.quit()
-# soup = BeautifulSoup(html, 'html.parser')
-
-# # race_numbers = [div.text.strip() for div in soup.select('div.Race_Num > span')]
-# # venues = [li.a.text.strip() for li in soup.select('ul.RaceList_ProvinceSelect li')]
-
 import streamlit as st
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+"""
+## Web scraping on Streamlit Cloud with Selenium
 
-@st.experimental_singleton
-def get_driver():
-    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+[![Source](https://img.shields.io/badge/View-Source-<COLOR>.svg)](https://github.com/snehankekre/streamlit-selenium-chrome/)
 
-options = Options()
-options.add_argument('--disable-gpu')
-options.add_argument('--headless')
+This is a minimal, reproducible example of how to scrape the web with Selenium and Chrome on Streamlit's Community Cloud.
 
-driver = get_driver()
-driver.get('http://example.com')
+Fork this repo, and edit `/streamlit_app.py` to customize this app to your heart's desire. :heart:
+"""
 
-st.code(driver.page_source)
+with st.echo():
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.chrome.service import Service
+    from webdriver_manager.chrome import ChromeDriverManager
+
+    @st.experimental_singleton
+    def get_driver():
+        return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+    options = Options()
+    options.add_argument('--disable-gpu')
+    options.add_argument('--headless')
+
+    driver = get_driver()
+    driver.get("http://example.com")
+
+    st.code(driver.page_source)
