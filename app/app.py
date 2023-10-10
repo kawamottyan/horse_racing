@@ -12,6 +12,9 @@ import pickle
 import requests
 from bs4 import BeautifulSoup
 
+#その他
+import os
+
 # netkeibaのスクレイピングコード
 
 url = 'https://yoso.netkeiba.com/nar/?pid=race_list'
@@ -173,7 +176,8 @@ def open_model():
     return model
 
 def open_df():
-    df_file_path = f'./data/merged_df.csv'
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    df_file_path = os.path.join(current_dir, 'data', 'merged_df.csv')
     df = pd.read_csv(df_file_path)
     return df
 
