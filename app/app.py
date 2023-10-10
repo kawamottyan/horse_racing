@@ -4,25 +4,6 @@ import streamlit as st
 #データ加工
 import pandas as pd
 import re
-import numpy as np
-
-#SQL
-import psycopg2
-import configparser
-
-#モデル
-import lightgbm as lgb
-
-#クロスバリデーション
-from sklearn.model_selection import KFold
-
-#エヴァリュエーション
-from sklearn.metrics import precision_score, recall_score, mean_squared_error
-
-#可視化
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 #保存
 import pickle
