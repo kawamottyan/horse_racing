@@ -1,30 +1,37 @@
 import streamlit as st
+import requests
+from bs4 import BeautifulSoup
 
-"""
-## Web scraping on Streamlit Cloud with Selenium
+url = 'https://yoso.netkeiba.com/nar/?pid=race_list'
+response = requests.get(url)
+soup = BeautifulSoup(response.content, 'html.parser')
 
-[![Source](https://img.shields.io/badge/View-Source-<COLOR>.svg)](https://github.com/snehankekre/streamlit-selenium-chrome/)
+# すべてのレースリストを取得
+race_lists = soup.find_all('div', class_='RaceList')
 
-This is a minimal, reproducible example of how to scrape the web with Selenium and Chrome on Streamlit's Community Cloud.
+race_data = []
 
-Fork this repo, and edit `/streamlit_app.py` to customize this app to your heart's desire. :heart:
-"""
+for race_list in race_lists:
+    venue = race_list.find('div', class_='Jyo').a.text
+    races = race_list.find('div', class_='RaceList_Main').find_all('a')
 
-with st.echo():
-    from selenium import webdriver
-    from selenium.webdriver.chrome.options import Options
-    from selenium.webdriver.chrome.service import Service
-    from webdriver_manager.chrome import ChromeDriverManager
+    for race in races:
+        race_number = race.find('div', class_='RaceNum').span.text
+        race_id = race['href'].split('=')[-1]
 
-    @st.cache_resource
-    def get_driver():
-        return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+        race_data.append({
+            '会場': venue,
+            'レース番号': race_number,
+            'レースID': race_id
+        })
 
-    options = Options()
-    options.add_argument('--disable-gpu')
-    options.add_argument('--headless')
+venues = list(set([data['会場'] for data in race_data]))
+selected_venue = st.selectbox('会場を選択:', venues)
 
-    driver = get_driver()
-    driver.get("http://example.com")
+race_numbers = [data['レース番号'] for data in race_data if data['会場'] == selected_venue]
+selected_race_number = st.selectbox('レース番号を選択:', race_numbers)
 
-    st.code(driver.page_source)
+if st.button('URLを表示'):
+    for data in race_data:
+        if data['会場'] == selected_venue and data['レース番号'] == selected_race_number:
+            st.write(f"https://yoso.netkeiba.com/nar/?pid=race_yoso_list&race_id={data['レースID']}")

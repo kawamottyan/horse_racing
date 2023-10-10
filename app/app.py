@@ -31,8 +31,26 @@ import pickle
 import requests
 from bs4 import BeautifulSoup
 
+# netkeibaのスクレイピングコード
 
-# 正規表現を用いて、ユーザーの入力値からドメインとrace_idを取得す
+url = 'https://yoso.netkeiba.com/nar/?pid=race_list'
+response = requests.get(url)
+soup = BeautifulSoup(response.content, 'html.parser')
+race_lists = soup.find_all('div', class_='RaceList')
+race_data = []
+for race_list in race_lists:
+    venue = race_list.find('div', class_='Jyo').a.text
+    races = race_list.find('div', class_='RaceList_Main').find_all('a')
+    for race in races:
+        race_number = race.find('div', class_='RaceNum').span.text
+        race_id = race['href'].split('=')[-1]
+        race_data.append({
+            '会場': venue,
+            'レース番号': race_number,
+            'レースID': race_id
+        })
+
+###後で消す### 正規表現を用いて、ユーザーの入力値からドメインとrace_idを取得す
 
 def get_url(user_input):
     domain_match = re.search(r'https://(.*?)/', user_input)
@@ -357,28 +375,24 @@ def prediction(race_df, horse_df):
 
 # アプリケーション
 
-st.title("競馬予測アプリ")
-st.write("以下の入力フィールドにURLを入力して、競馬の予測を取得してください。")
+venues = list(set([data['会場'] for data in race_data]))
+selected_venue = st.selectbox('会場を選択:', venues)
 
-user_input = st.text_input("URLを入力してください:", value="", max_chars=None, key=None, type="default")
+race_numbers = [data['レース番号'] for data in race_data if data['会場'] == selected_venue]
+selected_race_number = st.selectbox('レース番号を選択:', race_numbers)
 
-if st.button("スクレイピング開始"):  # 入力ボタン
-    if user_input:
-        with st.spinner("スクレイピング中..."):
-            url, race_id = get_url(user_input)
+if st.button('予測を表示'):
+    for data in race_data:
+        if data['会場'] == selected_venue and data['レース番号'] == selected_race_number:
+            url = f"https://nar.netkeiba.com/race/result.html?race_id={data['レースID']}"
+
+            url, race_id = get_url(url)
             race_df, horse_df = scraping(url, race_id)
-
-        st.success("スクレイピングが完了しました。")
-
-        st.subheader("race_df:")  # データフレームの表示
-        st.dataframe(race_df)
-        st.subheader("horse_df:")
-        st.dataframe(horse_df)
-        with st.spinner("予測中..."):
-            sorted_df = prediction(race_df, horse_df)
-        st.success("予測が完了しました。")
-        st.subheader("sorted_df:")
-        st.dataframe(sorted_df)
-
-    else:
-        st.warning("URLが入力されていません。")
+            st.subheader("race_df:")  # データフレームの表示
+            st.dataframe(race_df)
+            st.subheader("horse_df:")
+            st.dataframe(horse_df)
+            with st.spinner("予測中..."):
+                sorted_df = prediction(race_df, horse_df)
+            st.subheader("sorted_df:")
+            st.dataframe(sorted_df)
