@@ -16,7 +16,6 @@ from bs4 import BeautifulSoup
 import os
 
 # netkeibaのスクレイピングコード
-
 url = 'https://yoso.netkeiba.com/nar/?pid=race_list'
 response = requests.get(url)
 soup = BeautifulSoup(response.content, 'html.parser')
@@ -170,7 +169,8 @@ def scraping(url, race_id):
     return race_df, horse_df
 
 def open_model():
-    model_file_path = f'./models/model.pkl'
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    model_file_path = os.path.join(current_dir, 'models', 'model.pkl')
     with open(model_file_path, 'rb') as f:
         model = pickle.load(f)
     return model
