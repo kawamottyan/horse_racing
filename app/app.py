@@ -5,6 +5,9 @@ import streamlit as st
 import pandas as pd
 import re
 
+#モデル
+import lightgbm as lgb
+
 #保存
 import pickle
 
