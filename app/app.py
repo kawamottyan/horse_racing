@@ -15,9 +15,6 @@ import pickle
 import requests
 from bs4 import BeautifulSoup
 
-#可視化 ### 後で消す
-from st_aggrid import AgGrid
-
 #その他
 import os
 import datetime
@@ -369,8 +366,6 @@ def prediction(race_df, horse_df):
                             # 'bataiju',
                             # 'zogen_ryou',
                             'y_pred']]
-    #後で消す
-    # sorted_df['bamei'] = sorted_df['bamei'].str.replace(' ', '')
 
     return sorted_df
 
