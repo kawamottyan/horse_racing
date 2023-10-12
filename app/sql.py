@@ -3,8 +3,8 @@
 '''
 params = {
     'kaisai_nen': '2023',
-    'start_date': '1008',
-    'end_date': '1015'
+    'start_date': '1001',
+    'end_date': '1101'
 }
 
 import psycopg2
@@ -139,6 +139,9 @@ n_uma_race_df.to_csv('./data/n_uma_race.csv')
 n_race_df.to_csv('./data/n_race.csv')
 n_payout_df.to_csv('./data/n_payout.csv')
 merged_df.to_csv('./data/merged_df.csv')
+
+print(len(merged_df))
+print(merged_df.head(5))
 
 # 接続のクローズ
 conn.close()

@@ -15,11 +15,19 @@ import pickle
 import requests
 from bs4 import BeautifulSoup
 
+#可視化 ### 後で消す
+from st_aggrid import AgGrid
+
 #その他
 import os
+import datetime
+
+# サイドバー
+date = st.sidebar.date_input("日付を選択", datetime.date.today())
+formatted_date = date.strftime('%Y%m%d')
+url = f"https://yoso.netkeiba.com/nar/?pid=race_list&kaisai_date={formatted_date}"
 
 # netkeibaのスクレイピングコード
-url = 'https://yoso.netkeiba.com/nar/?pid=race_list'
 response = requests.get(url)
 soup = BeautifulSoup(response.content, 'html.parser')
 race_lists = soup.find_all('div', class_='RaceList')
@@ -111,7 +119,6 @@ def scraping(url, race_id):
         race_list.extend([None, None])
 
     # 馬データ
-
     cancel_count = 0  # 不参加の競走馬数をカウントするカウンター
 
     horse_tables = soup.findAll("table", class_="RaceTable01")
@@ -315,8 +322,6 @@ def convert_datatype(df):
         except ValueError:
             df[column] = df[column].astype(float)
 
-        print(f"{column} のデータ型: {df[column].dtype}")
-
     return df
 
 def prediction(race_df, horse_df):
@@ -356,31 +361,85 @@ def prediction(race_df, horse_df):
     df['y_pred'] = model.predict(df[features], num_iteration=model.best_iteration)
     df['predicted_rank'] = df.groupby('group')['y_pred'].rank(method='min')
 
+    #データ成形
     sorted_df = df.sort_values(by=['group', 'predicted_rank'])
-    sorted_df = sorted_df[['predicted_rank', 'bamei', 'umaban', 'bataiju', 'zogen_ryou', 'y_pred']]
+    sorted_df = sorted_df[['predicted_rank',
+                            'bamei',
+                            'umaban',
+                            # 'bataiju',
+                            # 'zogen_ryou',
+                            'y_pred']]
+    #後で消す
+    # sorted_df['bamei'] = sorted_df['bamei'].str.replace(' ', '')
 
     return sorted_df
 
 # アプリケーション
 
+st.markdown(
+    """
+    <style>
+        .sidebar .selectbox {
+            font-family: Arial, sans-serif;
+        }
+        .reportview-container {
+            max-width: 100%;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# サイドバー
+st.sidebar.divider()
+
 venues = list(set([data['会場'] for data in race_data]))
-selected_venue = st.selectbox('会場を選択:', venues)
+selected_venue = st.sidebar.selectbox('会場を選択:', venues)
 
 race_numbers = [data['レース番号'] for data in race_data if data['会場'] == selected_venue]
-selected_race_number = st.selectbox('レース番号を選択:', race_numbers)
+selected_race_number = st.sidebar.selectbox('レース番号を選択:', race_numbers)
 
-if st.button('予測を表示'):
+# メイン画面
+st.sidebar.divider()
+if st.sidebar.button('予測を表示', type='primary' ,use_container_width=True):
     for data in race_data:
         if data['会場'] == selected_venue and data['レース番号'] == selected_race_number:
-            url = f"https://nar.netkeiba.com/race/result.html?race_id={data['レースID']}"
-
-            url, race_id = get_url(url)
+            url = f"https://nar.netkeiba.com/race/shutuba.html?race_id={data['レースID']}"
+            race_id = data['レースID']
             race_df, horse_df = scraping(url, race_id)
-            st.subheader("race_df:")  # データフレームの表示
-            st.dataframe(race_df)
-            st.subheader("horse_df:")
-            st.dataframe(horse_df)
+
+            type = race_df['type'].replace({'ダ': 'ダート', '芝': '芝'})
+            weather = race_df['weather']
+            condition = race_df['condition']
+
+            col1, col2, col3 = st.columns(3)
+            col1.metric(label="レース種別", value=type.iloc[0])
+            col2.metric(label="天気", value=weather.iloc[0])
+            col3.metric(label="馬場状態", value=condition.iloc[0])
+
+            st.divider()
+
             with st.spinner("予測中..."):
                 sorted_df = prediction(race_df, horse_df)
-            st.subheader("sorted_df:")
-            st.dataframe(sorted_df)
+
+
+            sorted_df = pd.merge(sorted_df, horse_df[['horse_number','popular','odds']], left_on='umaban', right_on='horse_number', how='left')
+            sorted_df.drop('horse_number', axis=1, inplace=True)
+
+            sorted_df = sorted_df.rename(columns={'predicted_rank': '予想順位', 'bamei': '馬名', 'umaban': '馬番', 'y_pred': '予測値', 'popular': '人気順位', 'odds': 'オッズ'})
+
+            max_val = sorted_df['予測値'].max()
+            sorted_df['予測値'] = max_val - sorted_df['予測値']
+
+            st.dataframe(
+                sorted_df,
+                hide_index=True,
+                column_config={
+                    "予測値": st.column_config.ProgressColumn(
+                        "予測値",
+                        format="%.2f",
+                        min_value=sorted_df['予測値'].min(),
+                        max_value=sorted_df['予測値'].max(),
+                    ),
+                },
+            )
