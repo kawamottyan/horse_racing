@@ -2,3 +2,4 @@ config.ini
 
 datasets/targetdata/rawdata/racepage/*
 datasets/traindata/*
+models/tmp/*
