@@ -1,7 +1,7 @@
 import numpy as np
 
 def check_top3_in_top5_predictions(group):
-    predicted_top5 = group.nsmallest(5, 'y_pred').index.tolist()
+    predicted_top5 = group.nsmallest(5, 'predicted_rank').index.tolist()
     actual_top3 = group.nsmallest(3, 'kakutei_chakujun').index.tolist()
     return all([horse in predicted_top5 for horse in actual_top3])
 

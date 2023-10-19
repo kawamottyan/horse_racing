@@ -14,6 +14,8 @@ def recall_at_5(predictions, actual):
     recall = len(common_elements) / 3
     return recall
 
+import numpy as np  # 必要な場合はインポート
+
 def recall5(test_datas, years):
     """
     recall@5とprecision@5を計算する
@@ -22,6 +24,9 @@ def recall5(test_datas, years):
     - test_datas: リスト。それぞれの年のテストデータのデータフレームを含む
     - years: 計算する年数のリスト
     """
+    all_precisions = []
+    all_recalls = []
+    
     for test_data, year in zip(test_datas, years):
         group_ids = test_data['group'].unique()
         precisions = []
@@ -34,5 +39,17 @@ def recall5(test_datas, years):
             precisions.append(p)
             recalls.append(r)
         
-        print(f"{year} Precision@5: {np.mean(precisions):.3%}")
-        print(f"{year} Recall@5: {np.mean(recalls):.3%}")
+        year_precision = np.mean(precisions)
+        year_recall = np.mean(recalls)
+        
+        print(f"{year} Precision@5: {year_precision:.3%}")
+        print(f"{year} Recall@5: {year_recall:.3%}")
+        
+        all_precisions.append(year_precision)
+        all_recalls.append(year_recall)
+    
+    # 全年の平均値を計算
+    print(f"Average Precision@5: {np.mean(all_precisions):.3%}")
+    print(f"Average Recall@5: {np.mean(all_recalls):.3%}")
+
+
