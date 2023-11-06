@@ -420,8 +420,8 @@ if st.sidebar.button('予測を表示', type='primary' ,use_container_width=True
             col3.metric(label="馬場状態", value=condition.iloc[0])
 
             st.divider()
-            st.dataframe(race_df)
-            st.dataframe(horse_df)
+            # st.dataframe(race_df)
+            # st.dataframe(horse_df)
             with st.spinner("予測中..."):
                 sorted_df = prediction(race_df, horse_df)
 
