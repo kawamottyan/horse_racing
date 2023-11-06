@@ -361,10 +361,12 @@ def prediction(race_df, horse_df):
     # target = 'kakutei_chakujun'
 
     df['y_pred'] = model.predict(df[features], num_iteration=model.best_iteration)
-    df['predicted_rank'] = df.groupby('group')['y_pred'].rank(method='min')
+    # df['predicted_rank'] = df.groupby('group')['y_pred'].rank(method='min')
+    df['predicted_rank'] = df['y_pred'].rank(method='min')
 
     #データ成形
-    sorted_df = df.sort_values(by=['group', 'predicted_rank'])
+    # sorted_df = df.sort_values(by=['group', 'predicted_rank'])
+    sorted_df = df.sort_values(by=['predicted_rank'])
     sorted_df = sorted_df[['predicted_rank',
                             'bamei',
                             'umaban',
