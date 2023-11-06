@@ -259,54 +259,58 @@ def choose_race(df, race_df):
     race_df['day'] = race_df['day'].astype(str).str.zfill(2)
     race_df['monthday'] = race_df['month'].astype(str) + race_df['day'].astype(str)
     race_df['group'] = race_df['year'].astype(int).astype(str) +"-"+ race_df['monthday'].astype(int).astype(str) +"-"+  race_df['keibajo_code'].astype(int).astype(str) +"-"+  race_df['race_number'].astype(int).astype(str)
-    df = df[df['group'].isin(race_df['group'])]
+    # df = df[df['group'].isin(race_df['group'])]
     return df, race_df
 
 def merged_df(df, race_df, horse_df):
-    df['tenko_code'] = race_df['tenko_code'].iloc[0]
-    df['babajotai_code_dirt'] = race_df['babajotai_code_dirt'].iloc[0]
-    df['shusso_tosu'] = race_df['total'].iloc[0]
+    # df['tenko_code'] = race_df['tenko_code'].iloc[0]
+    # df['babajotai_code_dirt'] = race_df['babajotai_code_dirt'].iloc[0]
+    # df['shusso_tosu'] = race_df['total'].iloc[0]
 
     horse_df = horse_df.rename(columns={
+        'horse_name': 'bamei',
         'horse_number': 'umaban',
         'weight': 'bataiju',
         'weight_diff': 'zogen_ryou'
     })
 
-    horse_df['umaban'] = horse_df['umaban'].astype(int)
-    df['umaban'] = df['umaban'].astype(int)
+    # horse_df['umaban'] = horse_df['umaban'].astype(int)
+    # df['umaban'] = df['umaban'].astype(int)
 
-    df = df.merge(horse_df[['umaban', 'bataiju']], on='umaban', how='left', suffixes=('', '_new'))
-    df = df.merge(horse_df[['umaban', 'zogen_ryou']], on='umaban', how='left', suffixes=('', '_new'))
-    df['bataiju'] = df['bataiju_new'].combine_first(df['bataiju'])
-    df['zogen_ryou'] = df['zogen_ryou_new'].combine_first(df['zogen_ryou'])
-    df.drop(columns=['bataiju_new', 'zogen_ryou_new'], inplace=True)
+    # df = df.merge(horse_df[['umaban', 'bataiju']], on='umaban', how='left', suffixes=('', '_new'))
+    # df = df.merge(horse_df[['umaban', 'zogen_ryou']], on='umaban', how='left', suffixes=('', '_new'))
+    # df['bataiju'] = df['bataiju_new'].combine_first(df['bataiju'])
+    # df['zogen_ryou'] = df['zogen_ryou_new'].combine_first(df['zogen_ryou'])
+    # df.drop(columns=['bataiju_new', 'zogen_ryou_new'], inplace=True)
 
-    df['hutan_wariai'] = df['futan_juryo'].astype(int) / pd.to_numeric(df['bataiju'], errors='coerce')
+    # df['hutan_wariai'] = df['futan_juryo'].astype(int) / pd.to_numeric(df['bataiju'], errors='coerce')
+
+    df = horse_df.copy()
 
     return df, race_df, horse_df
 
 def convert_datatype(df):
     columns_to_convert = [
-                        'kyori',
-                        'grade_code',
-                        'seibetsu_code',
-                        'moshoku_code',
-                        'barei',
-                        'chokyoshi_code',
-                        'banushi_code',
-                        'kishu_code',
-                        'kishu_minarai_code',
-                        'kyoso_shubetsu_code',
-                        'juryo_shubetsu_code',
-                        'shusso_tosu',
-                        'tenko_code',
-                        'babajotai_code_dirt',
-                        'hutan_wariai',
+                        'umaban',
+                        # 'kyori',
+                        # 'grade_code',
+                        # 'seibetsu_code',
+                        # 'moshoku_code',
+                        # 'barei',
+                        # 'chokyoshi_code',
+                        # 'banushi_code',
+                        # 'kishu_code',
+                        # 'kishu_minarai_code',
+                        # 'kyoso_shubetsu_code',
+                        # 'juryo_shubetsu_code',
+                        # 'shusso_tosu',
+                        # 'tenko_code',
+                        # 'babajotai_code_dirt',
+                        # 'hutan_wariai',
                         'zogen_ryou',
 
-                        'track_code',
-                        'keibajo_code'
+                        # 'track_code',
+                        # 'keibajo_code'
                         ]
 
     for column in columns_to_convert:
@@ -333,27 +337,28 @@ def prediction(race_df, horse_df):
     df = df[~df['umaban'].isin(cancelled_umabans)]
 
     features = [
-            'kyori',
-            'grade_code',
-            'seibetsu_code',
-            'moshoku_code',
-            'barei',
-            'chokyoshi_code',
-            'banushi_code',
-            'kishu_code',
-            'kishu_minarai_code',
-            'kyoso_shubetsu_code',
-            'juryo_shubetsu_code',
-            'shusso_tosu',
-            'tenko_code',
-            'babajotai_code_dirt',
-            'hutan_wariai',
+            'umaban',
+            # 'kyori',
+            # 'grade_code',
+            # 'seibetsu_code',
+            # 'moshoku_code',
+            # 'barei',
+            # 'chokyoshi_code',
+            # 'banushi_code',
+            # 'kishu_code',
+            # 'kishu_minarai_code',
+            # 'kyoso_shubetsu_code',
+            # 'juryo_shubetsu_code',
+            # 'shusso_tosu',
+            # 'tenko_code',
+            # 'babajotai_code_dirt',
+            # 'hutan_wariai',
             'zogen_ryou',
 
-            'track_code',
-            'keibajo_code'
+            # 'track_code',
+            # 'keibajo_code'
             ]
-    target = 'kakutei_chakujun'
+    # target = 'kakutei_chakujun'
 
     df['y_pred'] = model.predict(df[features], num_iteration=model.best_iteration)
     df['predicted_rank'] = df.groupby('group')['y_pred'].rank(method='min')
