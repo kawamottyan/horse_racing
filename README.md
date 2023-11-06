@@ -1,7 +1,7 @@
 ### 🐎 Overview
 地方競馬のレースを予測するためのモデル。
 
-https://horseracing.streamlit.app/
+https://horseracing.streamlit.app/  
 https://zenn.dev/kawamottyan/articles/86fe1695d84bd8
 
 ### ⚡️ Quickstart
