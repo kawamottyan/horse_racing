@@ -1,5 +1,5 @@
 ### 🐎 Overview
-中央競馬及び、地方競馬のレースを予測するためのモデル。
+地方競馬のレースを予測するためのモデル。
 
 https://horseracing.streamlit.app/
 
