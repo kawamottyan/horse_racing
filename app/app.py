@@ -395,7 +395,9 @@ st.markdown(
 # サイドバー
 st.sidebar.divider()
 
-venues = list(set([data['会場'] for data in race_data]))
+# venues = list(set([data['会場'] for data in race_data]))
+venues = [venue for venue in (set(data['会場'] for data in race_data)) if venue != '帯広(ば)']
+
 selected_venue = st.sidebar.selectbox('会場を選択:', venues)
 
 race_numbers = [data['レース番号'] for data in race_data if data['会場'] == selected_venue]
