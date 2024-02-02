@@ -1,0 +1,5 @@
+[postgresql]
+user=postgres
+password=postgres
+host=localhost
+database=pckeiba
